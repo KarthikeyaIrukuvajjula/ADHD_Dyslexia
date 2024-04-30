@@ -1,5 +1,5 @@
 import streamlit as st
-from scipy.io import loadmat
+ import loadmat
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import load_model
