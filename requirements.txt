@@ -1,7 +1,6 @@
 streamlit
 pandas==1.4.0
-scipy==1.7.3
-scikit-learn==0.24.2
-tensorflow==2.7.0
-h5py==3.5.0
-loadmat5==0.1.1
+scipy
+scikit-learn
+tensorflow
+loadmat5
