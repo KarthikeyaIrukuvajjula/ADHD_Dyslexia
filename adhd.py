@@ -1,12 +1,10 @@
 import streamlit as st
-from scipy.io import loadmat
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import load_model
+import h5py
 
-# Load Keras model
-model_path = r"C:\Users\DELL\my_adhd_model.h5"
-model = load_model(model_path)
+model = load_model(r"C:\Users\DELL\my_adhd_model.h5")  # Update with the correct path
 
 # Preprocess data
 def preprocess_data(data):
@@ -16,43 +14,37 @@ def preprocess_data(data):
 
 # Predict ADHD
 def predict_adhd(mat_file):
-    data_dict = loadmat(mat_file)
-    file_name = mat_file.name.split(".")[0]  # Remove file extension from the uploaded file name
+    with h5py.File(mat_file, 'r') as file:
+        # Assuming your data is stored in a dataset named 'data'
+        data_array = file['data'][:]
     
-    if file_name in data_dict:  # Check if the file name is a key in data_dict
-        data_array = data_dict[file_name]
+    # Convert to DataFrame
+    df = pd.DataFrame(data_array)
 
-        # Convert to DataFrame
-        df = pd.DataFrame(data_array)
+    # Ensure DataFrame is not empty
+    if not df.empty:
+        # Preprocess the data and make prediction
+        processed_data = preprocess_data(df)
+        prediction = model.predict(processed_data)
 
-        # Ensure DataFrame is not empty
-        if not df.empty:
-            # Preprocess the data and make prediction
-            processed_data = preprocess_data(df)
-            prediction = model.predict(processed_data)
+        if prediction is not None and len(prediction) > 0:
+            # Take the mean of the prediction array
+            mean_prediction = prediction.mean()
+            st.write(mean_prediction)
 
-            if prediction is not None and len(prediction) > 0:
-                # Take the mean of the prediction array
-                mean_prediction = prediction.mean()
-                rounded_prediction = round(mean_prediction, 3)
-                st.write("Mean Prediction:", rounded_prediction)
-
-                # Categorize prediction
-                if rounded_prediction < 0.28:
-                    return "Non Diagnostic"
-                elif 0.28 <= rounded_prediction < 0.45:
-                    return "Dyslexia"
-                elif 0.45 <= rounded_prediction < 0.65:
-                    return "ADHD"
-                else:
-                    return "Dyslexia and ADHD"
-                
+            # Check prediction and return result
+            if mean_prediction < 0.28:
+                return "Non Diagnostic"
+            elif 0.28 <= mean_prediction < 0.45:
+                return "Dyslexia"
+            elif 0.45 <= mean_prediction < 0.65:
+                return "ADHD"
             else:
-                return "Failed to make prediction. Please ensure the data format is correct."
+                return "Dyslexia and ADHD"
         else:
-            return "Failed to create DataFrame from the data."
+            return "Failed to make prediction. Please ensure the data format is correct."
     else:
-        return "Invalid data format. Please upload a .mat file with the correct filename."
+        return "Failed to create DataFrame from the data."
 
 # Main function to run the Streamlit app
 def main():
