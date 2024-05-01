@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import load_model
+import sklearn
 import h5py
 
 model = load_model(r"C:\Users\DELL\my_adhd_model.h5")  # Update with the correct path
