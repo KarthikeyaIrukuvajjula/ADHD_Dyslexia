@@ -1,10 +1,12 @@
 import streamlit as st
-import loadmat
+from scipy.io import loadmat
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import load_model
 
-model = load_model(r"C:\Users\DELL\my_adhd_model.h5")  # Update with the correct path
+# Load Keras model
+model_path = r"C:\Users\DELL\my_adhd_model.h5"
+model = load_model(model_path)
 
 # Preprocess data
 def preprocess_data(data):
@@ -32,19 +34,19 @@ def predict_adhd(mat_file):
             if prediction is not None and len(prediction) > 0:
                 # Take the mean of the prediction array
                 mean_prediction = prediction.mean()
-                st.write(mean_prediction)
+                rounded_prediction = round(mean_prediction, 3)
+                st.write("Mean Prediction:", rounded_prediction)
 
-                # Check if mean prediction is greater than 0.5
-                if mean_prediction < 0.28:
+                # Categorize prediction
+                if rounded_prediction < 0.28:
                     return "Non Diagnostic"
-                elif mean_prediction >= 0.28 and mean_prediction <0.45:
+                elif 0.28 <= rounded_prediction < 0.45:
                     return "Dyslexia"
-                elif mean_prediction >= 0.45 and mean_prediction <0.65:
+                elif 0.45 <= rounded_prediction < 0.65:
                     return "ADHD"
                 else:
                     return "Dyslexia and ADHD"
                 
-
             else:
                 return "Failed to make prediction. Please ensure the data format is correct."
         else:
@@ -54,7 +56,6 @@ def predict_adhd(mat_file):
 
 # Main function to run the Streamlit app
 def main():
-    
     st.title("ADHD and Dyslexia Prediction App")
     st.write("Upload .mat file to predict ADHD and Dyslexia")
 
